@@ -27,6 +27,7 @@ int main(){
     return 0;
 }
 
+// Reference: https://www.geeksforgeeks.org/print-all-prime-numbers-less-than-or-equal-to-n/
 bool isPrime(int n){
     // Edge cases
     if (n <= 1)
