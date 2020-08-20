@@ -1,7 +1,7 @@
 #include<stdio.h>
 #include<math.h>
 #include <stdbool.h>
-
+#include<stdlib.h>
 bool isPrime(int n);
 
 int main(){
@@ -16,10 +16,19 @@ int main(){
     fp = fopen("primes.txt", "w+");
     fprintf(fp, "Prime Number less than %d:\n",n);
 
+ 
+    //Find primes and store in array
+    int *primesArray = (int*)malloc(n * sizeof(int));
     for(int i = 2; i <= n; i++){
         if(isPrime(i)){
-            fprintf(fp, "%d\n", i);
+            primesArray[i]=i;
         }
+    }
+    
+    //Write prime numbers to file
+    for (int i=0; i<n; i++){
+        if (primesArray[i])
+            fprintf(fp, "%d\n", i);
     }
 
     fclose(fp);

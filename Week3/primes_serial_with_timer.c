@@ -1,4 +1,5 @@
 #include<stdio.h>
+#include<stdlib.h>
 #include<math.h>
 #include<time.h>
 #include <stdbool.h>
@@ -9,7 +10,7 @@ int main(){
     // Initialise variables for timing program runtime
     clock_t start, end;
     double cpu_time_used;
-
+   
     // Start timer
     start = clock();
     printf("Enter a number: ");
@@ -17,16 +18,25 @@ int main(){
     // Read user input and store it in variable 'n'
     int n;
     scanf("%d", &n);
-
+    
+    int *primesArray = (int*)malloc(n * sizeof(int));
+     
     // Create a file named "primes.txt"
     FILE *fp;
     fp = fopen("primes.txt", "w+");
     fprintf(fp, "Prime Number less than %d:\n",n);
 
+    //Find primes and store in array
     for(int i = 2; i <= n; i++){
         if(isPrime(i)){
-            fprintf(fp, "%d\n", i);
+            primesArray[i]=i;
         }
+    }
+    
+    //Write prime numbers to file
+    for (int i=0; i<n; i++){
+        if (primesArray[i])
+            fprintf(fp, "%d\n", i);
     }
 
     fclose(fp);
