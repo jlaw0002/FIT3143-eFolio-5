@@ -7,15 +7,15 @@
 
 //Function Declarrations
 bool isPrime(int n);
-void threadFunc(int rank, int size, int number);
 
 int main(int argc, char **argv){
-    // 
+    
     int rank, size, n, r_value;
     MPI_Status status;
     MPI_Init(&argc, &argv);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     MPI_Comm_size(MPI_COMM_WORLD, &size);
+   
     
     // Initialise array that will contain prime numbers found
     int *primesArray= NULL;
@@ -28,76 +28,109 @@ int main(int argc, char **argv){
 	    // Read user input and store it in variable 'n'
         printf("Enter a number: ");
         fflush(stdout);
-        scanf("%d", &n);
-        
-        primesArray = (int*)malloc(n * sizeof(int));
-        
+        scanf(" %d", &n);
+          
         // Start timer
         start = clock();
-        
-        MPI_Send(&n, 1, MPI_INT, rank + 1, 0, MPI_COMM_WORLD);
-        
-	    threadFunc(rank, size, n);
-	} else {
-	    if(rank != size - 1){
-	        MPI_Recv(&r_value, 1, MPI_INT, rank - 1, 0, MPI_COMM_WORLD, &status);
-	        MPI_Send(&r_value, 1, MPI_INT, rank + 1, 0, MPI_COMM_WORLD);
-	        threadFunc(rank, size, r_value);
-	    } else {
-	        MPI_Recv(&r_value, 1, MPI_INT, rank - 1, 0, MPI_COMM_WORLD, &status);
-	        threadFunc(rank, size, r_value);
-	    }
+
+
+	}
+	
+	//Broadcast the value of n to all processes
+    MPI_Bcast(&n,1,MPI_INT,0,MPI_COMM_WORLD);
+    
+    
+    //Split the work across each process 
+    int npp= n/size; //npt = numbers per process
+    int nppr = n % size; //nrpt = num per process remainder
+
+    int sp = rank * npp; // Start point
+	int ep = sp + npp; // End point = start point + npp
+
+	//Add remainders to the last process
+	if(rank == size-1)
+		ep += nppr;
+	
+
+    
+
+    //Allocate memory
+    if (rank==0){
+        //Root process will need all results
+        primesArray=(int*)malloc(n * sizeof(int));
+    }
+    else{
+        //Other processes only need memory for numbers they are calculating
+        primesArray = (int*)malloc((ep-sp) * sizeof(int));
+    }
+    
+    
+    // Parallel computing of prime numbers
+    for(int i = sp; i< ep; i++){ 
+		if(isPrime(i)){
+            primesArray[i-sp] = i;
+        }
 	}
     
-    // End timer and print duration
-    MPI_Finalize();
-    if (rank == 0){ 
+    //Send the arrays results back to the root process
+    if (rank==0){
+        //Root process only needse to receive data
+        int offset;
+        offset = npp;
+        for (int i=1; i< size; i++){
+        
+            //Iterate through each process and receive their data sent
+            if (i!=size-1){
+		        MPI_Recv((int*)primesArray + offset, npp, MPI_INT, i, 0, MPI_COMM_WORLD, &status);
+            }
+            else{
+                //Last process will send any remainders so need to change input size
+		        MPI_Recv((int*)primesArray + offset, npp+nppr, MPI_INT, i, 0, MPI_COMM_WORLD, &status);
+            }
+            //Increase offset pointer by amount of numbers per process
+		    offset += npp; 
+        } 
+  
+    }
+    else{
+        //Send data to root process
+        fflush(stdout);
+        MPI_Send((int*)primesArray, (ep - sp), MPI_INT, 0, 0, MPI_COMM_WORLD);
+
+    }
+    
+    if (rank ==0){
+        //Write prime numbers to file
+        FILE *fp;
+        fp = fopen("primes_all.txt", "w+");
+        fprintf(fp, "Prime Numbers from %d to %d:\n", 0, n);
+
+       
+        for (int i = 0; i < n; i++){
+            if (primesArray[i])
+                fprintf(fp, "%d\n", i);
+        }
+        
+        //Close file and free allocated memory
+        fclose(fp);
+        printf("%s created\n", "primes_all.txt");
+        fflush(stdout);
+        
+        
+        // End timer and print duration
         end = clock();
         cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
         printf("This program took %f to execute\n", cpu_time_used);
+        
     }
+    
+    //Cleanup and Exit program 
+    free(primesArray);
+    MPI_Finalize();
     return 0;
 }
 
-void threadFunc(int rank, int size, int number){
-    //Split the work across each thread
-    int npt= number/size; //npt = numbers per thread
-    int nptr = number % size; //nrpt = num per thread remainder
-
-    int sp = rank * npt; // Start point
-	int ep = sp + npt; // End point = start point + npt
-
-	//Add remainders to the first thread
-	if(rank == size-1)
-		ep += nptr;
-    
-    // Shared memory parallelism
-    for(int i = sp; i< ep; i++){ 
-		if(isPrime(i)){
-            array[i] = i;
-        }
-	}
-	
-	char filename[100];
-	sprintf(filename, "primes_%d.txt", rank);
-	
-    FILE *fp;
-    fp = fopen(filename, "w+");
-    fprintf(fp, "Prime Numbers from %d to %d:\n", sp, ep);
-    
-    //Write prime numbers to file
-    for (int i = sp; i < ep; i++){
-        if (array[i])
-            fprintf(fp, "%d\n", i);
-    }
-    
-    //Close file and free allocated memory
-    fclose(fp);
-    printf("%s created\n", filename);
-    fflush(stdout);
-    free(array);
-    return;
-}
+  
 
 // Reference: https://www.geeksforgeeks.org/print-all-prime-numbers-less-than-or-equal-to-n/
 bool isPrime(int n){

@@ -7,10 +7,10 @@
 
 //Function Declarrations
 bool isPrime(int n);
-void threadFunc(int rank, int size, int number);
+void processFunc(int rank, int size, int number);
 
 int main(int argc, char **argv){
-    // 
+    
     int rank, size, n, r_value;
     MPI_Status status;
     MPI_Init(&argc, &argv);
@@ -32,16 +32,15 @@ int main(int argc, char **argv){
         
         MPI_Send(&n, 1, MPI_INT, rank + 1, 0, MPI_COMM_WORLD);
         
-	    threadFunc(rank, size, n);
+	    processFunc(rank, size, n);
 	} else {
+	    //Send and receieve n value to other processes
+        MPI_Recv(&r_value, 1, MPI_INT, rank - 1, 0, MPI_COMM_WORLD, &status);   
 	    if(rank != size - 1){
-	        MPI_Recv(&r_value, 1, MPI_INT, rank - 1, 0, MPI_COMM_WORLD, &status);
 	        MPI_Send(&r_value, 1, MPI_INT, rank + 1, 0, MPI_COMM_WORLD);
-	        threadFunc(rank, size, r_value);
-	    } else {
-	        MPI_Recv(&r_value, 1, MPI_INT, rank - 1, 0, MPI_COMM_WORLD, &status);
-	        threadFunc(rank, size, r_value);
-	    }
+	    } 
+        
+        processFunc(rank, size, r_value);
 	}
     
     // End timer and print duration
@@ -54,17 +53,17 @@ int main(int argc, char **argv){
     return 0;
 }
 
-void threadFunc(int rank, int size, int number){
+void processFunc(int rank, int size, int number){
     //Split the work across each thread
-    int npt= number/size; //npt = numbers per thread
-    int nptr = number % size; //nrpt = num per thread remainder
+    int npp= number/size; //npt = numbers per process
+    int nppr = number % size; //nrpt = num per process remainder
 
-    int sp = rank * npt; // Start point
-	int ep = sp + npt; // End point = start point + npt
+    int sp = rank * npp; // Start point
+	int ep = sp + npp; // End point = start point + npp
 
 	//Add remainders to the first thread
 	if(rank == size-1)
-		ep += nptr;
+		ep += nppr;
     
     // Initialise array that will contain prime numbers found
     int *array= NULL;
@@ -77,6 +76,7 @@ void threadFunc(int rank, int size, int number){
         }
 	}
 	
+	//Create filename for each process
 	char filename[100];
 	sprintf(filename, "primes_%d.txt", rank);
 	
