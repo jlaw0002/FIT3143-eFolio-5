@@ -7,9 +7,8 @@ int main( argc, argv )
 int argc;
 char **argv; {
     int rank, value, size, errcnt, toterr, i, j;
-    MPI_Request r[4];
-    int nreq;
-    MPI_Status statuses[4];
+    int up_nbr, down_nbr;
+    MPI_Status status;
     double x[12][12];
     double xlocal[(12/4)+2][12];
     MPI_Init( &argc, &argv );
@@ -25,23 +24,19 @@ char **argv; {
         xlocal[0][j] = -1;
         xlocal[maxn/size+1][j] = -1;
     }
+    /* Send up and receive from below (shift up)*/
+    /* Note the use of xlocal[i] for &xlocal[i][0]*/
+    /* Note that we use MPI_PROC_NULL to remove the if statements that
+    would be needed without MPI_PROC_NULL */
+    up_nbr = rank + 1;
+    if (up_nbr >= size) up_nbr = MPI_PROC_NULL;
+    down_nbr = rank -1;
+    if (down_nbr < 0) down_nbr = MPI_PROC_NULL;
     
-    /* Send up unless I'm at the top, then receive from below */
-    /* Note the use of xlocal[i] for &xlocal[i][0] */
-    nreq = 0;
-    if (rank < size - 1) 
-	    MPI_Isend( xlocal[maxn/size], maxn, MPI_DOUBLE, rank + 1, 0, 
-		  MPI_COMM_WORLD, &r[nreq++] );
-    if (rank > 0)
-	    MPI_Irecv( xlocal[0], maxn, MPI_DOUBLE, rank - 1, 0, MPI_COMM_WORLD, &r[nreq++] );
-    /* Send down unless I'm at the bottom */
-    if (rank > 0) 
-	    MPI_Isend( xlocal[1], maxn, MPI_DOUBLE, rank - 1, 1, MPI_COMM_WORLD, &r[nreq++] );
-    if (rank < size - 1) 
-	    MPI_Irecv( xlocal[maxn/size+1], maxn, MPI_DOUBLE, rank + 1, 1, 
-		  MPI_COMM_WORLD, &r[nreq++] );
-
-    MPI_Waitall( nreq, r, statuses );
+    MPI_Sendrecv( xlocal[maxn/size], maxn, MPI_DOUBLE,up_nbr, 0,xlocal[0], maxn, MPI_DOUBLE, down_nbr, 0,MPI_COMM_WORLD, &status );
+    
+    /* Send down and receive from above (shift down) */
+    MPI_Sendrecv( xlocal[1], maxn, MPI_DOUBLE, down_nbr, 1,xlocal[maxn/size+1], maxn, MPI_DOUBLE, up_nbr, 1,MPI_COMM_WORLD, &status );
     
     /* Check that we have the correct results */
     errcnt = 0;
