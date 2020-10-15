@@ -11,6 +11,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <mpi.h>
+#include <time.h>
 #define SHIFT_ROW 0
 #define SHIFT_COL 1
 #define DISP 1
@@ -27,6 +28,7 @@ int main(int argc, char *argv[]) {
     int dims[ndims],coord[ndims];
     int wrap_around[ndims];
     int myValue;
+    int nAdjacent=4;
     
     /* start up initial MPI environment */
     MPI_Init(&argc, &argv);
@@ -72,7 +74,7 @@ int main(int argc, char *argv[]) {
     MPI_Cart_coords(comm2D, my_rank, ndims, coord);
     
     /* Generate and assign a random prime number */
-    myValue = generatePrime();
+    myValue = generatePrime(my_rank);
     
     /* use my cartesian coordinates to find my rank in cartesian group*/
     MPI_Cart_rank(comm2D, coord, &my_cart_rank);
@@ -84,20 +86,67 @@ int main(int argc, char *argv[]) {
     printf("Global rank: %d. Cart rank: %d. Coord: (%d, %d). Left: %d. Right: %d. Top: %d. Bottom: %d. My value: %d\n", my_rank, my_cart_rank, coord[0], coord[1], nbr_j_lo, nbr_j_hi, nbr_i_lo, nbr_i_hi,myValue);
     fflush(stdout);
     
+    
+    //Arrays to store requests
+    MPI_Request send_request[4];
+    MPI_Request receive_request[4];
+    MPI_Status send_status[4];
+    MPI_Status receive_status[4];
+    
+    //Array to store adjacent cart ranks
+    // Index: 0=Top 1=Bottom 2=Left 3=Right
+    int adjacentCartRanks[nAdjacent];
+    adjacentCartRanks[0]=nbr_i_lo;
+    adjacentCartRanks[1]=nbr_i_hi;
+    adjacentCartRanks[2]=nbr_j_lo;
+    adjacentCartRanks[3]=nbr_j_hi;
+    
+    //Send to all adjacent node
+    for (int i= 0; i< nAdjacent; i++){
+        MPI_Isend(&myValue, 1, MPI_INT, adjacentCartRanks[i], 0, comm2D, &send_request[i]);
+        //printf("test \n");
+    }
+    
+    //Receive from adjacent nodes
+    int recvValues[nAdjacent]; // Index: 0=Top 1=Bottom 2=Left 3=Right
+    for (int i= 0; i< nAdjacent; i++){
+        MPI_Irecv(&recvValues[i], 1, MPI_INT, adjacentCartRanks[i], 0, comm2D, &receive_request[i]);
+    }
+
+    
+    MPI_Waitall(4, send_request, send_status);
+    MPI_Waitall(4, receive_request, receive_status);
+    
+
+    //Create filename for each node
+	char filename[100];
+	sprintf(filename, "logfile_%d.txt", my_cart_rank);
+    FILE *fp;
+    fp = fopen(filename, "w+");
+    
+    //Check if any received values are same as own value
+    for (int i= 0; i< nAdjacent; i++){
+        if (recvValues[i] == myValue){
+            printf("Match in cart rank %d check log file \n",my_cart_rank);
+            fprintf(fp, "Prime number %d matches from node %d \n", myValue,adjacentCartRanks[i]);
+        }
+    }
+   
+    
     MPI_Comm_free( &comm2D );
     MPI_Finalize();
     return 0;
 }
 
-int generatePrime(){
+int generatePrime(int rank){
     // Use current time as seed for random generator
-    srand(time(0)); 
+    srand(time(0)+rank); 
     
     int randomNumber;
     bool randomPrimeFound = false;
     
     while(!randomPrimeFound){
-        randomNumber = rand();
+        randomNumber = rand() % (101); //Generate random number from 0-100
         if(isPrime(randomNumber)){
             randomPrimeFound = true; 
         }
