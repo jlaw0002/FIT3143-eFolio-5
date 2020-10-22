@@ -34,7 +34,7 @@ int main(int argc, char *argv[])
 			memset(pX4Buff, 0, fileElementCount * sizeof(double)); // Optional
 
 			// Send the counter to the last process
-			MPI_Send(&fileElementCount, 1, MPI_INT, (p - 1), 0, MPI_COMM_WORLD);
+			MPI_Send(&fileElementCount, 1, MPI_INT, 3, 0, MPI_COMM_WORLD);
 
 			// Read each element from the file
 			while(counter < fileElementCount)
@@ -54,7 +54,7 @@ int main(int argc, char *argv[])
 			MPI_Send(&x1, 1, MPI_DOUBLE, 1, 0, MPI_COMM_WORLD);
 
 			// Wait for buffer from last node
-			MPI_Recv((void*)pX4Buff, counter, MPI_DOUBLE, (p - 1), 0, MPI_COMM_WORLD, &status);
+			MPI_Recv((void*)pX4Buff, counter, MPI_DOUBLE, 3, 0, MPI_COMM_WORLD, &status);
 
 			// Print results
 			for(int i = 0; i < counter; i++)
