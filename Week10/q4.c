@@ -27,12 +27,14 @@ int main(int argc, char *argv[]){
     
     switch (my_rank){
         case 0:{
-
+            //Open file
             pInfile = fopen("quad.txt","r");
+
+            //Get element count
             fscanf(pInfile, "%d", &fileElementCount);
-            // Fix this line
-            // fscanf(pInfile, "%s\t%s\t%s", &a_coeff, &b_coeff, &c_coeff);
-            //fscanf(pInfile, "%*[^\n]\n");
+           
+            //Skip header line
+            fscanf(pInfile, "%*[^\n]\n");
 
             //Send the counter to the last process
 			MPI_Send(&fileElementCount, 1, MPI_INT, 2, 0, MPI_COMM_WORLD);
@@ -48,9 +50,10 @@ int main(int argc, char *argv[]){
 				counter++;
                 
 			}
-			
+			//Close file
 			fclose(pInfile);
 			pInfile = NULL;
+            //Send exit message
 			MPI_Send(&disc, 1, MPI_FLOAT, 1, MSG_EXIT, MPI_COMM_WORLD);
 			MPI_Send(&a_coeff, 1, MPI_FLOAT, 1, MSG_EXIT, MPI_COMM_WORLD);
 			MPI_Send(&b_coeff, 1, MPI_FLOAT, 1, MSG_EXIT, MPI_COMM_WORLD);
@@ -58,15 +61,15 @@ int main(int argc, char *argv[]){
 
         }
         case 1:{
-            // WRITE PART (b) HERE
+            
             do
 			{   
-
+                //Receive values from processes 0
 				MPI_Recv(&disc, 1, MPI_FLOAT, 0, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
 				MPI_Recv(&a_coeff, 1, MPI_FLOAT, 0, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
 				MPI_Recv(&b_coeff, 1, MPI_FLOAT, 0, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
 
-                // printf("Disc: %f",disc);
+                //Calculate x1 and x2
                 if(status.MPI_TAG != MSG_EXIT){
                     if(disc > 0){
                         x1 = (-b_coeff + sqrt(disc)) / (2 * a_coeff);
@@ -89,6 +92,7 @@ int main(int argc, char *argv[]){
                     }
                 }
                 else{
+                    //Send exit message
                     MPI_Send(&x1, 1, MPI_FLOAT, 2, MSG_EXIT, MPI_COMM_WORLD);
                     MPI_Send(&x2, 1, MPI_FLOAT, 2, MSG_EXIT, MPI_COMM_WORLD);
                    
@@ -100,16 +104,16 @@ int main(int argc, char *argv[]){
         }
        
         case 2:{
-            // WRITE PART (c) HERE
+            //Receieve element count
             MPI_Recv(&fileElementCount, 1, MPI_INT, 0, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
+
+            //Write headers
             pOutFile = fopen("roots.txt","w+");
             fprintf(pOutFile,"%d \n",fileElementCount);
             fprintf(pOutFile,"x1\tx2\tx1_real\tx1_img\tx2_real\tx2_img\n");
 
-           
-
-
             do {
+                //Receive x1 and x2 from process 1
                 MPI_Recv(&x1, 1, MPI_FLOAT, 1, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
 				MPI_Recv(&x2, 1, MPI_FLOAT, 1, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
             
@@ -117,7 +121,7 @@ int main(int argc, char *argv[]){
                     case MSG_EXIT: {
                         break;
                     }
-                    
+                    //Write to file
                     case MSG_REAL_SOLUTIONS: {
                         fprintf(pOutFile,"\t\t%.1f\t%.1f\t\n", x1, x2);
                         break;
