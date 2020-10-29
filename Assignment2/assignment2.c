@@ -288,7 +288,7 @@ int sensor_io(MPI_Comm world_comm, MPI_Comm comm, int* dims){
 
 
 	    //Check for possible events
-	    if(myTemp > TOLERANCE){
+	    if(myTemp > THRESHOLD){
 	    	
 	    	//Compare between neighbours
 	    	int matches = 0;
