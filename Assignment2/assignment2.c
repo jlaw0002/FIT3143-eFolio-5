@@ -6,11 +6,14 @@
 #include <time.h>
 #include <stddef.h>
 #include <unistd.h>
+#include <pthread.h> 
 
 #define SHIFT_ROW 0
 #define SHIFT_COL 1
 #define DISP 1
 #define ITERATIONS 10
+#define MIN_TEMP 60
+#define MAX_TEMP 100
 #define THRESHOLD 80
 #define TOLERANCE 5
 
@@ -33,7 +36,17 @@ typedef struct {
     // char macAddrerss[50];
 } sensorAlert;
 
-int base_io(MPI_Comm world_comm, MPI_Comm comm);
+struct satelliteReading {
+    int temp;
+    int coords[2];
+    char time[50];
+} ;
+
+struct satelliteReading satelliteReadings[ITERATIONS];
+int nreadings = 0;
+
+int base_io(MPI_Comm world_comm, MPI_Comm comm, int* dims);
+void* getSatelliteReading(void *pArg);
 int sensor_io(MPI_Comm world_comm, MPI_Comm comm, int* dims);
 
 int main(int argc, char *argv[]) {
@@ -46,13 +59,10 @@ int main(int argc, char *argv[]) {
     int wrap_around[ndims];
     int myValue;
     
-
     /* start up initial MPI environment */
     MPI_Init(&argc, &argv);
     MPI_Comm_size(MPI_COMM_WORLD, &size);
     MPI_Comm_rank(MPI_COMM_WORLD, &myRank);
-
-   
 
     //Check for command line arguments
     if (argc == 3) {
@@ -90,7 +100,7 @@ int main(int argc, char *argv[]) {
 	MPI_Comm_split( MPI_COMM_WORLD,myRank != size-1, 0, &comm2D); 
 
    	if (myRank == size-1) 
-		base_io( MPI_COMM_WORLD, comm2D );
+		base_io( MPI_COMM_WORLD, comm2D, dims );
     else
 		sensor_io( MPI_COMM_WORLD, comm2D, dims);
     MPI_Finalize();
@@ -100,7 +110,7 @@ int main(int argc, char *argv[]) {
 
 }
 /* This is the master */
-int base_io(MPI_Comm world_comm, MPI_Comm comm){
+int base_io(MPI_Comm world_comm, MPI_Comm comm, int* dims){
 	int i, size, nslaves,myRank;
 	char buf[256], buf2[256];
 	MPI_Status status;
@@ -133,19 +143,21 @@ int base_io(MPI_Comm world_comm, MPI_Comm comm){
 
 	int testCount=0;
 	for (int i=0; i<ITERATIONS; i++){
-		
+	    // Infrared Imaging Satellite Simulation using a POSIX thread
+        pthread_t tid;
+        pthread_create(&tid, 0, getSatelliteReading, (void*) dims); // Create the thread
+        pthread_join(tid, NULL); // Wait for the thread to complete.
 
 		// I think each sensor node needs to communicate to the base station.
 		// Dont think its possible for the sensor node to send a "done" message as each
 		// sensor node would have to communicate with each other.
 
-		for (int j=0; j< size-1; j++){
+		for (int j=0; j< nslaves; j++){
 			//Need to keep in seperate for loop to send first
 			MPI_Send(&i, 1, MPI_INT, j, CONTINUE, world_comm);
 		}
 		
-		
-		for (int j=0; j< size-1; j++){
+		for (int j=0; j< nslaves; j++){
 			//Send status message to sensor node to keep generating numbers
 			
 
@@ -153,32 +165,128 @@ int base_io(MPI_Comm world_comm, MPI_Comm comm){
 			MPI_Recv(&alert, 1, mpiSensorAlertType, j, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
 			//printf("messaged received from sensor node with rank %d \n",j);
 			if(status.MPI_TAG == SENSOR_STATUS_ALERT){
+			
+			    //Get current time for logging
+	            time_t currentTime = time(NULL);
+	            char * currentTimeString = ctime(&currentTime);
+	            currentTimeString[strlen(currentTimeString)-1] = '\0';
 				
+				/*
 				printf("BASE STATION[%d][%d]: Received ALERT %s \n",i,testCount, alert.alertTime);
 				printf("BASE STATION[%d][%d]: Received ALERT from sensor node rank %d with temp: %d, tag: %d, coords(%d,%d) \n",i,testCount,alert.myRank,alert.myTemp,status.MPI_TAG,alert.myCoord[0],alert.myCoord[1]);
 				printf("BASE STATION[%d][%d]: Adjacent Ranks: [top:%d, down:%d, left:%d, right:%d], Adjacent Temps[%d,%d,%d,%d] \n",i,testCount,alert.adjacentRanks[0],alert.adjacentRanks[1],alert.adjacentRanks[2],alert.adjacentRanks[3],alert.adjacentTemps[0],alert.adjacentTemps[1],alert.adjacentTemps[2],alert.adjacentTemps[3]);
 				printf("BASE STATION[%d][%d]: Adjacent Coords: (%d,%d),(%d,%d),(%d,%d),(%d,%d)\n",i,testCount,alert.adjacentCoordsX[0],alert.adjacentCoordsY[0],alert.adjacentCoordsX[1],alert.adjacentCoordsY[1],alert.adjacentCoordsX[2],alert.adjacentCoordsY[2],alert.adjacentCoordsX[3],alert.adjacentCoordsY[3]);
-				//fflush(stdout);
+				*/
+				
+				int flag = 0;
+				struct satelliteReading flaggedReading;
+				
+				for(int i = 0; i < ITERATIONS; i++){
+				    if ((satelliteReadings[i].coords[0] == alert.myCoord[0] && satelliteReadings[i].coords[1] == alert.myCoord[1]) || 
+				    (satelliteReadings[i].coords[0] == alert.adjacentCoordsX[0] && satelliteReadings[i].coords[1] == alert.adjacentCoordsY[0]) ||
+				    (satelliteReadings[i].coords[0] == alert.adjacentCoordsX[1] && satelliteReadings[i].coords[1] == alert.adjacentCoordsY[1]) ||
+				    (satelliteReadings[i].coords[0] == alert.adjacentCoordsX[2] && satelliteReadings[i].coords[1] == alert.adjacentCoordsY[2]) ||
+				    (satelliteReadings[i].coords[0] == alert.adjacentCoordsX[3] && satelliteReadings[i].coords[1] == alert.adjacentCoordsY[3])) {
+				        if((alert.adjacentTemps[0] < 0) && (abs(satelliteReadings[i].temp - alert.adjacentTemps[0]) <= TOLERANCE) || 
+				        ((alert.adjacentTemps[1] < 0) && abs(satelliteReadings[i].temp - alert.adjacentTemps[1]) <= TOLERANCE) || 
+				        ((alert.adjacentTemps[2] < 0) && abs(satelliteReadings[i].temp - alert.adjacentTemps[2]) <= TOLERANCE) || 
+				        ((alert.adjacentTemps[3] < 0) && abs(satelliteReadings[i].temp - alert.adjacentTemps[3]) <= TOLERANCE)){
+				            flag = 1;
+				            flaggedReading.temp = satelliteReadings[i].temp;
+				            memcpy(flaggedReading.coords, satelliteReadings[i].coords, sizeof satelliteReadings[i].coords);
+				            strcpy(flaggedReading.time, satelliteReadings[i].time);
+				        }
+				    }	        
+				}
+				
+				printf("--------------------------------------------------\n");
+				printf("Iteration: %d\n", i);
+				printf("Logged Time:\t%s\n", currentTimeString);
+				printf("Alert Rrported Time:\t%s\n", alert.alertTime);
+				 
+				if(flag == 1)
+				   printf("Alert Type: True\n\n");
+				else
+				   printf("Alert Type: False\n\n");
+				   
+				printf("Reporting Node\tCoord\tTemp\tMAC\tIP\n");
+				printf("%d\t(%d,%d)\t%d\n", alert.myRank, alert.myCoord[0], alert.myCoord[1], alert.myTemp);
+				
+				printf("Adjacent Nodes\tCoord\tTemp\tMAC\tIP\n");
+				for(int i = 0; i < 4; i++){
+				    printf("%d\t(%d,%d)\t%d\n", alert.adjacentRanks[i], alert.adjacentCoordsX[i], alert.adjacentCoordsY[i], alert.adjacentTemps[i]);
+				}
+				
+				printf("Infrared Satellite Reporting Time: %s\n", flaggedReading.time);
+				printf("Infrared Satellite Reporting Temp (Celsius): %d\n", flaggedReading.temp);
+				printf("Infrared Satellite Reporting Coord: (%d,%d)\n\n", flaggedReading.coords[0], flaggedReading.coords[1]);
+				
+				printf("Communication Time (seconds): %d\n", 0);
+				printf("Total Messages send between reporting node and base station: %d\n", 1);
+				printf("Number of adjacent matches to reporting node: %d\n", 3);
+				printf("--------------------------------------------------\n");
+				fflush(stdout);
 			}
 			
 			testCount++;
 		}
+		
+		/*
+		struct satelliteReading emptyReading;
+		for(int i = 0; i < sizeof satelliteReadings; i++){
+            satelliteReadings[i] = emptyReading;
+        }*/
+		
 		//Sleep delay
 		printf("Waiting for delay before next iteration...\n");
 		sleep(1);
 	}
 
 	//Exit message tag
-	for (int j=0; j< size-1; j++){
-
+	for (int j=0; j< nslaves; j++){
 		//printf("Sending exit message to process %d \n",j);
 		MPI_Send(&j, 1, MPI_INT, j, EXIT_TAG, world_comm);
 	}
+	
 	printf("TEST COUNT : %d \n",testCount);
 	fflush(stdout);
 
 	return 0;
 }
+
+void* getSatelliteReading(void* pArg) { 
+    // Seed RNG with current time 
+    srand(time(NULL));
+    
+    // Generate a (valid) temperature reading
+	int tempReading = rand() % (MAX_TEMP + 1 - MIN_TEMP) + MIN_TEMP; //Generate random number from 60-100
+	
+	// Get sensor network's dimensions from inout parameter
+    int* coords = (int*) pArg;
+    int coordReading[sizeof coords];
+    // Generate random (valid) coordinates
+    coordReading[0] = rand() % coords[0];
+    coordReading[1] = rand() % coords[1];
+    
+    //Get current time for reading
+	time_t currentTime = time(NULL);
+	char * currentTimeString = ctime(&currentTime);
+	currentTimeString[strlen(currentTimeString)-1] = '\0';
+			    
+    //printf("# Temperature of %d at (%d, %d) at %s\n", tempReading, coordReading[0], coordReading[1], currentTimeString);
+    
+    // Create reading
+    struct satelliteReading reading;
+    reading.temp = tempReading;
+    memcpy(reading.coords,coordReading, sizeof coordReading);
+    strcpy(reading.time,currentTimeString);
+    
+    // Add reading to global variable so that base node can use reading for analysis
+    satelliteReadings[nreadings] = reading;
+    nreadings++;
+    
+}
+
 int sensor_io(MPI_Comm world_comm, MPI_Comm comm, int* dims){
 	int ndims=2, size, myRank, reorder, myCartRank, ierr, worldSize;
 	MPI_Comm comm2D;
@@ -224,11 +332,11 @@ int sensor_io(MPI_Comm world_comm, MPI_Comm comm, int* dims){
 	ierr = MPI_Cart_create(comm, ndims, dims, wrap_around, reorder, &comm2D);
 	if(ierr != 0) printf("ERROR[%d] creating CART\n",ierr);
 
-
+    /*
 	if(myRank==0){
 		printf("Slave Rank: %d. Comm Size: %d: Grid Dimension = [%d x %d] \n",myRank,size,dims[0],dims[1]);
 		fflush(stdout);
-	}
+	}*/
 		
 	//Get coordinate and rank
 	MPI_Cart_coords(comm2D, myRank, ndims, coord);
@@ -260,7 +368,7 @@ int sensor_io(MPI_Comm world_comm, MPI_Comm comm, int* dims){
 			
     	//Generate a random temperature
 		srand(time(NULL)+myRank*iterationCount);
-	    myTemp = rand() % (100 + 1 - 60) + 60; //Generate random number from 60-100
+	    myTemp = rand() % (MAX_TEMP + 1 - MIN_TEMP) + MIN_TEMP; //Generate random number from 60-100
 
 	    //Send value to all adjacent node
 	    for (int i= 0; i< nAdjacent; i++){
