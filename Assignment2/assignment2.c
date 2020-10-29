@@ -78,6 +78,7 @@ int main(int argc, char *argv[]) {
     } else {
     	//No command line arguments
         nrows=ncols=(int)sqrt(size);
+
         //Let dimensions be auto generated
         dims[0]=dims[1]=0;
      	if(myRank == 0){
@@ -91,7 +92,6 @@ int main(int argc, char *argv[]) {
    	if (myRank == size-1) 
 		base_io( MPI_COMM_WORLD, comm2D );
     else
-    	//Need to pass in dims
 		sensor_io( MPI_COMM_WORLD, comm2D, dims);
     MPI_Finalize();
     
@@ -213,8 +213,6 @@ int sensor_io(MPI_Comm world_comm, MPI_Comm comm, int* dims){
   	MPI_Comm_size(comm, &size); // size of the slave communicator
 	MPI_Comm_rank(comm, &myRank);  // rank of the slave communicator
 	
-	//printf("Sensor Node: Global Rank %d \n",myRank);
-
 	//Create dimensions
 	MPI_Dims_create(size, ndims, dims);
 
@@ -252,32 +250,22 @@ int sensor_io(MPI_Comm world_comm, MPI_Comm comm, int* dims){
     
    	//printf("Rank %d adjacent up: %d ,down %d, left %d, right %d \n",myRank,adjacentCartRanks[0],adjacentCartRanks[1],adjacentCartRanks[2],adjacentCartRanks[3]);
 
+
     //First message from base station
     MPI_Recv(&sensorStatus, 1, MPI_INT, worldSize-1, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
-    //printf("Received tag %d for sensor %d \n",status.MPI_TAG,myRank);
-
-
+    
     int iterationCount=0;
     //Run until received tag from base station is exit
     while(status.MPI_TAG!=EXIT_TAG){
-		
-    	
-
-
+			
     	//Generate a random temperature
 		srand(time(NULL)+myRank*iterationCount);
 	    myTemp = rand() % (100 + 1 - 60) + 60; //Generate random number from 60-100
 
-	  
-
-	    //printf("iteration: %d, my temp: %d, my rank: %d,\n",iterationCount,myTemp,myRank);
-	    fflush(stdout);
-
 	    //Send value to all adjacent node
 	    for (int i= 0; i< nAdjacent; i++){
 	    	
-    		MPI_Isend(&myTemp, 1, MPI_INT, adjacentCartRanks[i], 5, comm2D, &send_request[i]);
-			
+    		MPI_Isend(&myTemp, 1, MPI_INT, adjacentCartRanks[i], 5, comm2D, &send_request[i]);		
 	    }
 	    
 	    //Array to store receivedValues
@@ -299,22 +287,15 @@ int sensor_io(MPI_Comm world_comm, MPI_Comm comm, int* dims){
     	alert.myCoord[1] = coord[1];
 
 
-
 	    //Check for possible events
 	    if(myTemp > TOLERANCE){
 	    	
 	    	//Compare between neighbours
 	    	int matches = 0;
-
-	    	
+    	
 	    	//Check if received values are in tolerance range
 	    	for (int i= 0; i< nAdjacent; i++){
-	    		if(iterationCount==1){
-	    			
-	    			//printf("Global rank: %d. Cart rank: %d. Coord: (%d, %d). Left: %d. Right: %d. Top: %d. Bottom: %d. My value: %d\n", myRank, myCartRank, coord[0], coord[1], recvValues[0], recvValues[1], recvValues[2], recvValues[3],myTemp);
 
-
-	    		}
     			//Check if neighbour exists
 	    		if (adjacentCartRanks[i]<0){
 	    			//Set received value to -1 to ignore
@@ -322,7 +303,6 @@ int sensor_io(MPI_Comm world_comm, MPI_Comm comm, int* dims){
 	    		}
 	    	
 		        if (recvValues[i]<= myTemp+TOLERANCE && recvValues[i]>= myTemp-TOLERANCE){
-		        	//printf("Found match \n");
 		        	matches++;
 		        }
 		    }
@@ -340,10 +320,11 @@ int sensor_io(MPI_Comm world_comm, MPI_Comm comm, int* dims){
 		    		//Set adjacentCoords
 		    		int adjacentCoordsTemp[2];
 		    		if(adjacentCartRanks[i]>=0){	    		
+		    			//Adjacent rank exist, get coords
 			    		MPI_Cart_coords(comm2D, adjacentCartRanks[i], ndims, adjacentCoordsTemp);	    		
 		    		}
 		    		else{
-		    			//Doesnt exist
+		    			//Doesnt exist set coord to -1
 		    			adjacentCoordsTemp[0]=-1;
 		    			adjacentCoordsTemp[1]=-1;
 		    		}
@@ -358,9 +339,7 @@ int sensor_io(MPI_Comm world_comm, MPI_Comm comm, int* dims){
 			    currentTimeString[strlen(currentTimeString)-1] = '\0';
 			    strcpy(alert.alertTime,currentTimeString);
 			   
-			    //printf("Current Time : %s\n", currentTimeString);
-
-
+			    
 		    	//Send alert
 		    	MPI_Send(&alert, 1, mpiSensorAlertType, worldSize-1, SENSOR_STATUS_ALERT, world_comm);
 		    }
@@ -383,8 +362,6 @@ int sensor_io(MPI_Comm world_comm, MPI_Comm comm, int* dims){
 		iterationCount++;
     }
 
-    //printf("second test count %d for rank %d \n",secondTestCount,myRank);
-    fflush(stdout);
     //printf("EXIT_TAG RECEIVED FOR SENSOR %d \n",myRank);
 
 	MPI_Comm_free( &comm2D );
