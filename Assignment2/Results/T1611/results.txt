@@ -1,0 +1,618 @@
+Results generated on Sat Oct 31 05:32:31 2020 with 16 sensors in a [4,4] grid with 11 IR readings per iteration
+----------------------------------------------------------------------------
+Iteration: 0
+Logged Time:			Sat Oct 31 05:32:31 2020
+Alert Reported Time:	Sat Oct 31 05:32:31 2020
+Alert Type: False
+
+Reporting Node	Coord	Temp
+0				(0,0)	95°C
+
+Adjacent Nodes	Coord	Temp
+4				(1,0)	95°C
+1				(0,1)	95°C
+
+Communication Time between adjacent nodes: 0.002569s
+Communication Time between the reporting node and the base station: 0.084150s
+Total Messages sent between reporting node and base station: 1
+Number of adjacent matches to reporting node: 2
+----------------------------------------------------------------------------
+----------------------------------------------------------------------------
+Iteration: 0
+Logged Time:			Sat Oct 31 05:32:31 2020
+Alert Reported Time:	Sat Oct 31 05:32:31 2020
+Alert Type: False
+
+Reporting Node	Coord	Temp
+1				(0,1)	95°C
+
+Adjacent Nodes	Coord	Temp
+5				(1,1)	95°C
+0				(0,0)	95°C
+2				(0,2)	95°C
+
+Communication Time between adjacent nodes: 0.000012s
+Communication Time between the reporting node and the base station: 0.084173s
+Total Messages sent between reporting node and base station: 1
+Number of adjacent matches to reporting node: 3
+----------------------------------------------------------------------------
+----------------------------------------------------------------------------
+Iteration: 0
+Logged Time:			Sat Oct 31 05:32:31 2020
+Alert Reported Time:	Sat Oct 31 05:32:31 2020
+Alert Type: False
+
+Reporting Node	Coord	Temp
+2				(0,2)	95°C
+
+Adjacent Nodes	Coord	Temp
+6				(1,2)	95°C
+1				(0,1)	95°C
+3				(0,3)	95°C
+
+Communication Time between adjacent nodes: 0.000015s
+Communication Time between the reporting node and the base station: 0.084183s
+Total Messages sent between reporting node and base station: 1
+Number of adjacent matches to reporting node: 3
+----------------------------------------------------------------------------
+----------------------------------------------------------------------------
+Iteration: 0
+Logged Time:			Sat Oct 31 05:32:31 2020
+Alert Reported Time:	Sat Oct 31 05:32:31 2020
+Alert Type: False
+
+Reporting Node	Coord	Temp
+3				(0,3)	95°C
+
+Adjacent Nodes	Coord	Temp
+7				(1,3)	95°C
+2				(0,2)	95°C
+
+Communication Time between adjacent nodes: 0.000012s
+Communication Time between the reporting node and the base station: 0.084191s
+Total Messages sent between reporting node and base station: 1
+Number of adjacent matches to reporting node: 2
+----------------------------------------------------------------------------
+----------------------------------------------------------------------------
+Iteration: 0
+Logged Time:			Sat Oct 31 05:32:31 2020
+Alert Reported Time:	Sat Oct 31 05:32:31 2020
+Alert Type: True
+
+Reporting Node	Coord	Temp
+4				(1,0)	95°C
+
+Adjacent Nodes	Coord	Temp
+0				(0,0)	95°C
+8				(2,0)	95°C
+5				(1,1)	95°C
+
+Infrared Satellite Reporting Time: Sat Oct 31 05:32:31 2020
+Infrared Satellite Reporting Temp: 94°C
+Infrared Satellite Reporting Coord: (2,0)
+
+Communication Time between adjacent nodes: 0.004653s
+Communication Time between the reporting node and the base station: 0.088811s
+Total Messages sent between reporting node and base station: 1
+Number of adjacent matches to reporting node: 3
+----------------------------------------------------------------------------
+----------------------------------------------------------------------------
+Iteration: 0
+Logged Time:			Sat Oct 31 05:32:31 2020
+Alert Reported Time:	Sat Oct 31 05:32:31 2020
+Alert Type: False
+
+Reporting Node	Coord	Temp
+5				(1,1)	95°C
+
+Adjacent Nodes	Coord	Temp
+1				(0,1)	95°C
+9				(2,1)	95°C
+4				(1,0)	95°C
+6				(1,2)	95°C
+
+Communication Time between adjacent nodes: 0.003730s
+Communication Time between the reporting node and the base station: 0.088830s
+Total Messages sent between reporting node and base station: 1
+Number of adjacent matches to reporting node: 4
+----------------------------------------------------------------------------
+----------------------------------------------------------------------------
+Iteration: 0
+Logged Time:			Sat Oct 31 05:32:31 2020
+Alert Reported Time:	Sat Oct 31 05:32:31 2020
+Alert Type: True
+
+Reporting Node	Coord	Temp
+6				(1,2)	95°C
+
+Adjacent Nodes	Coord	Temp
+2				(0,2)	95°C
+10				(2,2)	95°C
+5				(1,1)	95°C
+7				(1,3)	95°C
+
+Infrared Satellite Reporting Time: Sat Oct 31 05:32:31 2020
+Infrared Satellite Reporting Temp: 93°C
+Infrared Satellite Reporting Coord: (2,2)
+
+Communication Time between adjacent nodes: 0.000034s
+Communication Time between the reporting node and the base station: 0.088840s
+Total Messages sent between reporting node and base station: 1
+Number of adjacent matches to reporting node: 4
+----------------------------------------------------------------------------
+----------------------------------------------------------------------------
+Iteration: 0
+Logged Time:			Sat Oct 31 05:32:31 2020
+Alert Reported Time:	Sat Oct 31 05:32:31 2020
+Alert Type: False
+
+Reporting Node	Coord	Temp
+7				(1,3)	95°C
+
+Adjacent Nodes	Coord	Temp
+3				(0,3)	95°C
+11				(2,3)	95°C
+6				(1,2)	95°C
+
+Communication Time between adjacent nodes: 0.000013s
+Communication Time between the reporting node and the base station: 0.088889s
+Total Messages sent between reporting node and base station: 1
+Number of adjacent matches to reporting node: 3
+----------------------------------------------------------------------------
+----------------------------------------------------------------------------
+Iteration: 0
+Logged Time:			Sat Oct 31 05:32:31 2020
+Alert Reported Time:	Sat Oct 31 05:32:31 2020
+Alert Type: True
+
+Reporting Node	Coord	Temp
+8				(2,0)	95°C
+
+Adjacent Nodes	Coord	Temp
+4				(1,0)	95°C
+12				(3,0)	95°C
+9				(2,1)	95°C
+
+Infrared Satellite Reporting Time: Sat Oct 31 05:32:31 2020
+Infrared Satellite Reporting Temp: 94°C
+Infrared Satellite Reporting Coord: (2,0)
+
+Communication Time between adjacent nodes: 0.000006s
+Communication Time between the reporting node and the base station: 0.088902s
+Total Messages sent between reporting node and base station: 1
+Number of adjacent matches to reporting node: 3
+----------------------------------------------------------------------------
+----------------------------------------------------------------------------
+Iteration: 0
+Logged Time:			Sat Oct 31 05:32:31 2020
+Alert Reported Time:	Sat Oct 31 05:32:31 2020
+Alert Type: True
+
+Reporting Node	Coord	Temp
+9				(2,1)	95°C
+
+Adjacent Nodes	Coord	Temp
+5				(1,1)	95°C
+13				(3,1)	95°C
+8				(2,0)	95°C
+10				(2,2)	95°C
+
+Infrared Satellite Reporting Time: Sat Oct 31 05:32:31 2020
+Infrared Satellite Reporting Temp: 94°C
+Infrared Satellite Reporting Coord: (2,0)
+
+Communication Time between adjacent nodes: 0.003522s
+Communication Time between the reporting node and the base station: 0.088912s
+Total Messages sent between reporting node and base station: 1
+Number of adjacent matches to reporting node: 4
+----------------------------------------------------------------------------
+----------------------------------------------------------------------------
+Iteration: 0
+Logged Time:			Sat Oct 31 05:32:31 2020
+Alert Reported Time:	Sat Oct 31 05:32:31 2020
+Alert Type: True
+
+Reporting Node	Coord	Temp
+10				(2,2)	95°C
+
+Adjacent Nodes	Coord	Temp
+6				(1,2)	95°C
+14				(3,2)	95°C
+9				(2,1)	95°C
+11				(2,3)	95°C
+
+Infrared Satellite Reporting Time: Sat Oct 31 05:32:31 2020
+Infrared Satellite Reporting Temp: 93°C
+Infrared Satellite Reporting Coord: (2,2)
+
+Communication Time between adjacent nodes: 0.003668s
+Communication Time between the reporting node and the base station: 0.088922s
+Total Messages sent between reporting node and base station: 1
+Number of adjacent matches to reporting node: 4
+----------------------------------------------------------------------------
+----------------------------------------------------------------------------
+Iteration: 0
+Logged Time:			Sat Oct 31 05:32:31 2020
+Alert Reported Time:	Sat Oct 31 05:32:31 2020
+Alert Type: True
+
+Reporting Node	Coord	Temp
+11				(2,3)	95°C
+
+Adjacent Nodes	Coord	Temp
+7				(1,3)	95°C
+15				(3,3)	95°C
+10				(2,2)	95°C
+
+Infrared Satellite Reporting Time: Sat Oct 31 05:32:31 2020
+Infrared Satellite Reporting Temp: 93°C
+Infrared Satellite Reporting Coord: (2,2)
+
+Communication Time between adjacent nodes: 0.000011s
+Communication Time between the reporting node and the base station: 0.088947s
+Total Messages sent between reporting node and base station: 1
+Number of adjacent matches to reporting node: 3
+----------------------------------------------------------------------------
+----------------------------------------------------------------------------
+Iteration: 0
+Logged Time:			Sat Oct 31 05:32:31 2020
+Alert Reported Time:	Sat Oct 31 05:32:31 2020
+Alert Type: True
+
+Reporting Node	Coord	Temp
+12				(3,0)	95°C
+
+Adjacent Nodes	Coord	Temp
+8				(2,0)	95°C
+13				(3,1)	95°C
+
+Infrared Satellite Reporting Time: Sat Oct 31 05:32:31 2020
+Infrared Satellite Reporting Temp: 94°C
+Infrared Satellite Reporting Coord: (2,0)
+
+Communication Time between adjacent nodes: 0.002717s
+Communication Time between the reporting node and the base station: 0.088978s
+Total Messages sent between reporting node and base station: 1
+Number of adjacent matches to reporting node: 2
+----------------------------------------------------------------------------
+----------------------------------------------------------------------------
+Iteration: 0
+Logged Time:			Sat Oct 31 05:32:31 2020
+Alert Reported Time:	Sat Oct 31 05:32:31 2020
+Alert Type: True
+
+Reporting Node	Coord	Temp
+13				(3,1)	95°C
+
+Adjacent Nodes	Coord	Temp
+9				(2,1)	95°C
+12				(3,0)	95°C
+14				(3,2)	95°C
+
+Infrared Satellite Reporting Time: Sat Oct 31 05:32:31 2020
+Infrared Satellite Reporting Temp: 95°C
+Infrared Satellite Reporting Coord: (3,1)
+
+Communication Time between adjacent nodes: 0.004382s
+Communication Time between the reporting node and the base station: 0.088988s
+Total Messages sent between reporting node and base station: 1
+Number of adjacent matches to reporting node: 3
+----------------------------------------------------------------------------
+----------------------------------------------------------------------------
+Iteration: 0
+Logged Time:			Sat Oct 31 05:32:31 2020
+Alert Reported Time:	Sat Oct 31 05:32:31 2020
+Alert Type: True
+
+Reporting Node	Coord	Temp
+14				(3,2)	95°C
+
+Adjacent Nodes	Coord	Temp
+10				(2,2)	95°C
+13				(3,1)	95°C
+15				(3,3)	95°C
+
+Infrared Satellite Reporting Time: Sat Oct 31 05:32:31 2020
+Infrared Satellite Reporting Temp: 93°C
+Infrared Satellite Reporting Coord: (2,2)
+
+Communication Time between adjacent nodes: 0.000006s
+Communication Time between the reporting node and the base station: 0.088998s
+Total Messages sent between reporting node and base station: 1
+Number of adjacent matches to reporting node: 3
+----------------------------------------------------------------------------
+----------------------------------------------------------------------------
+Iteration: 0
+Logged Time:			Sat Oct 31 05:32:31 2020
+Alert Reported Time:	Sat Oct 31 05:32:31 2020
+Alert Type: False
+
+Reporting Node	Coord	Temp
+15				(3,3)	95°C
+
+Adjacent Nodes	Coord	Temp
+11				(2,3)	95°C
+14				(3,2)	95°C
+
+Communication Time between adjacent nodes: 0.002225s
+Communication Time between the reporting node and the base station: 0.089007s
+Total Messages sent between reporting node and base station: 1
+Number of adjacent matches to reporting node: 2
+----------------------------------------------------------------------------
+----------------------------------------------------------------------------
+Iteration: 2
+Logged Time:			Sat Oct 31 05:32:34 2020
+Alert Reported Time:	Sat Oct 31 05:32:34 2020
+Alert Type: True
+
+Reporting Node	Coord	Temp
+9				(2,1)	85°C
+
+Adjacent Nodes	Coord	Temp
+5				(1,1)	89°C
+13				(3,1)	77°C
+8				(2,0)	85°C
+10				(2,2)	79°C
+
+Infrared Satellite Reporting Time: Sat Oct 31 05:32:33 2020
+Infrared Satellite Reporting Temp: 82°C
+Infrared Satellite Reporting Coord: (2,0)
+
+Communication Time between adjacent nodes: 0.005174s
+Communication Time between the reporting node and the base station: 0.009135s
+Total Messages sent between reporting node and base station: 2
+Number of adjacent matches to reporting node: 2
+----------------------------------------------------------------------------
+----------------------------------------------------------------------------
+Iteration: 2
+Logged Time:			Sat Oct 31 05:32:34 2020
+Alert Reported Time:	Sat Oct 31 05:32:33 2020
+Alert Type: False
+
+Reporting Node	Coord	Temp
+11				(2,3)	98°C
+
+Adjacent Nodes	Coord	Temp
+7				(1,3)	97°C
+15				(3,3)	99°C
+10				(2,2)	79°C
+
+Communication Time between adjacent nodes: 0.000007s
+Communication Time between the reporting node and the base station: 0.009181s
+Total Messages sent between reporting node and base station: 2
+Number of adjacent matches to reporting node: 2
+----------------------------------------------------------------------------
+----------------------------------------------------------------------------
+Iteration: 5
+Logged Time:			Sat Oct 31 05:32:37 2020
+Alert Reported Time:	Sat Oct 31 05:32:37 2020
+Alert Type: False
+
+Reporting Node	Coord	Temp
+11				(2,3)	90°C
+
+Adjacent Nodes	Coord	Temp
+7				(1,3)	79°C
+15				(3,3)	86°C
+10				(2,2)	91°C
+
+Communication Time between adjacent nodes: 0.000007s
+Communication Time between the reporting node and the base station: 0.011993s
+Total Messages sent between reporting node and base station: 3
+Number of adjacent matches to reporting node: 2
+----------------------------------------------------------------------------
+----------------------------------------------------------------------------
+Iteration: 6
+Logged Time:			Sat Oct 31 05:32:38 2020
+Alert Reported Time:	Sat Oct 31 05:32:38 2020
+Alert Type: False
+
+Reporting Node	Coord	Temp
+10				(2,2)	97°C
+
+Adjacent Nodes	Coord	Temp
+6				(1,2)	80°C
+14				(3,2)	99°C
+9				(2,1)	90°C
+11				(2,3)	96°C
+
+Communication Time between adjacent nodes: 0.000014s
+Communication Time between the reporting node and the base station: 0.008939s
+Total Messages sent between reporting node and base station: 2
+Number of adjacent matches to reporting node: 2
+----------------------------------------------------------------------------
+----------------------------------------------------------------------------
+Iteration: 6
+Logged Time:			Sat Oct 31 05:32:38 2020
+Alert Reported Time:	Sat Oct 31 05:32:38 2020
+Alert Type: True
+
+Reporting Node	Coord	Temp
+14				(3,2)	99°C
+
+Adjacent Nodes	Coord	Temp
+10				(2,2)	97°C
+13				(3,1)	97°C
+15				(3,3)	81°C
+
+Infrared Satellite Reporting Time: Sat Oct 31 05:32:38 2020
+Infrared Satellite Reporting Temp: 97°C
+Infrared Satellite Reporting Coord: (3,1)
+
+Communication Time between adjacent nodes: 0.000008s
+Communication Time between the reporting node and the base station: 0.008967s
+Total Messages sent between reporting node and base station: 2
+Number of adjacent matches to reporting node: 2
+----------------------------------------------------------------------------
+----------------------------------------------------------------------------
+Iteration: 7
+Logged Time:			Sat Oct 31 05:32:39 2020
+Alert Reported Time:	Sat Oct 31 05:32:39 2020
+Alert Type: False
+
+Reporting Node	Coord	Temp
+0				(0,0)	82°C
+
+Adjacent Nodes	Coord	Temp
+4				(1,0)	85°C
+1				(0,1)	83°C
+
+Communication Time between adjacent nodes: 0.007850s
+Communication Time between the reporting node and the base station: 0.011861s
+Total Messages sent between reporting node and base station: 2
+Number of adjacent matches to reporting node: 2
+----------------------------------------------------------------------------
+----------------------------------------------------------------------------
+Iteration: 7
+Logged Time:			Sat Oct 31 05:32:39 2020
+Alert Reported Time:	Sat Oct 31 05:32:39 2020
+Alert Type: False
+
+Reporting Node	Coord	Temp
+1				(0,1)	83°C
+
+Adjacent Nodes	Coord	Temp
+5				(1,1)	80°C
+0				(0,0)	82°C
+2				(0,2)	79°C
+
+Communication Time between adjacent nodes: 0.000011s
+Communication Time between the reporting node and the base station: 0.011884s
+Total Messages sent between reporting node and base station: 2
+Number of adjacent matches to reporting node: 3
+----------------------------------------------------------------------------
+----------------------------------------------------------------------------
+Iteration: 7
+Logged Time:			Sat Oct 31 05:32:39 2020
+Alert Reported Time:	Sat Oct 31 05:32:39 2020
+Alert Type: False
+
+Reporting Node	Coord	Temp
+4				(1,0)	85°C
+
+Adjacent Nodes	Coord	Temp
+0				(0,0)	82°C
+8				(2,0)	90°C
+5				(1,1)	80°C
+
+Communication Time between adjacent nodes: 0.000008s
+Communication Time between the reporting node and the base station: 0.011898s
+Total Messages sent between reporting node and base station: 2
+Number of adjacent matches to reporting node: 3
+----------------------------------------------------------------------------
+----------------------------------------------------------------------------
+Iteration: 7
+Logged Time:			Sat Oct 31 05:32:39 2020
+Alert Reported Time:	Sat Oct 31 05:32:39 2020
+Alert Type: True
+
+Reporting Node	Coord	Temp
+8				(2,0)	90°C
+
+Adjacent Nodes	Coord	Temp
+4				(1,0)	85°C
+12				(3,0)	87°C
+9				(2,1)	74°C
+
+Infrared Satellite Reporting Time: Sat Oct 31 05:32:39 2020
+Infrared Satellite Reporting Temp: 83°C
+Infrared Satellite Reporting Coord: (3,0)
+
+Communication Time between adjacent nodes: 0.003669s
+Communication Time between the reporting node and the base station: 0.011968s
+Total Messages sent between reporting node and base station: 2
+Number of adjacent matches to reporting node: 2
+----------------------------------------------------------------------------
+----------------------------------------------------------------------------
+Iteration: 7
+Logged Time:			Sat Oct 31 05:32:39 2020
+Alert Reported Time:	Sat Oct 31 05:32:39 2020
+Alert Type: True
+
+Reporting Node	Coord	Temp
+12				(3,0)	87°C
+
+Adjacent Nodes	Coord	Temp
+8				(2,0)	90°C
+13				(3,1)	91°C
+
+Infrared Satellite Reporting Time: Sat Oct 31 05:32:39 2020
+Infrared Satellite Reporting Temp: 83°C
+Infrared Satellite Reporting Coord: (3,0)
+
+Communication Time between adjacent nodes: 0.004005s
+Communication Time between the reporting node and the base station: 0.011983s
+Total Messages sent between reporting node and base station: 2
+Number of adjacent matches to reporting node: 2
+----------------------------------------------------------------------------
+----------------------------------------------------------------------------
+Iteration: 7
+Logged Time:			Sat Oct 31 05:32:39 2020
+Alert Reported Time:	Sat Oct 31 05:32:39 2020
+Alert Type: True
+
+Reporting Node	Coord	Temp
+13				(3,1)	91°C
+
+Adjacent Nodes	Coord	Temp
+9				(2,1)	74°C
+12				(3,0)	87°C
+14				(3,2)	93°C
+
+Infrared Satellite Reporting Time: Sat Oct 31 05:32:39 2020
+Infrared Satellite Reporting Temp: 83°C
+Infrared Satellite Reporting Coord: (3,0)
+
+Communication Time between adjacent nodes: 0.000007s
+Communication Time between the reporting node and the base station: 0.011992s
+Total Messages sent between reporting node and base station: 2
+Number of adjacent matches to reporting node: 2
+----------------------------------------------------------------------------
+----------------------------------------------------------------------------
+Iteration: 8
+Logged Time:			Sat Oct 31 05:32:40 2020
+Alert Reported Time:	Sat Oct 31 05:32:40 2020
+Alert Type: False
+
+Reporting Node	Coord	Temp
+11				(2,3)	81°C
+
+Adjacent Nodes	Coord	Temp
+7				(1,3)	77°C
+15				(3,3)	84°C
+10				(2,2)	91°C
+
+Communication Time between adjacent nodes: 0.000024s
+Communication Time between the reporting node and the base station: 0.010010s
+Total Messages sent between reporting node and base station: 4
+Number of adjacent matches to reporting node: 2
+----------------------------------------------------------------------------
+----------------------------------------------------------------------------
+Iteration: 8
+Logged Time:			Sat Oct 31 05:32:40 2020
+Alert Reported Time:	Sat Oct 31 05:32:40 2020
+Alert Type: True
+
+Reporting Node	Coord	Temp
+15				(3,3)	84°C
+
+Adjacent Nodes	Coord	Temp
+11				(2,3)	81°C
+14				(3,2)	82°C
+
+Infrared Satellite Reporting Time: Sat Oct 31 05:32:40 2020
+Infrared Satellite Reporting Temp: 77°C
+Infrared Satellite Reporting Coord: (3,2)
+
+Communication Time between adjacent nodes: 0.000025s
+Communication Time between the reporting node and the base station: 0.010031s
+Total Messages sent between reporting node and base station: 2
+Number of adjacent matches to reporting node: 2
+----------------------------------------------------------------------------
+
+----------------------------------------------------------------------------
+Summary
+True Alerts: 15
+False Alerts: 14
+Total Alerts: 29
+----------------------------------------------------------------------------

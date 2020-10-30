@@ -277,6 +277,11 @@ int base_io(MPI_Comm world_comm, MPI_Comm comm, int* dims){
 				fprintf(fp, "Number of adjacent matches to reporting node: %d\n", adjacentMatches);
 				fprintf(fp, "----------------------------------------------------------------------------\n");
 				//fflush(stdout);
+
+				if(flag == 1)
+					printf("%d\t%s\t%lf\t%f\n", i, "True", alert.commTime, commTimeBetweenReporterAndBase);
+				else
+					printf("%d\t%s\t%lf\t%f\n", i, "False", alert.commTime, commTimeBetweenReporterAndBase);
 			}
 			
 			testCount++;
