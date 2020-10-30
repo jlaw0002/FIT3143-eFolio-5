@@ -32,6 +32,7 @@ typedef struct {
     int adjacentCoordsX[4];
     int adjacentCoordsY[4];
     char alertTime[50];
+    double commTime;
 
     // char macAddrerss[50];
 } sensorAlert;
@@ -135,9 +136,9 @@ int base_io(MPI_Comm world_comm, MPI_Comm comm, int* dims){
 
 	//Alert struct
     MPI_Datatype mpiSensorAlertType;
-    MPI_Datatype type[8] = { MPI_INT, MPI_INT, MPI_INT, MPI_INT, MPI_INT,MPI_INT,MPI_INT,MPI_CHAR};
-  	int blocklen[8] = {1,1,2,4,4,4,4,50};
-  	MPI_Aint offsets[8];
+    MPI_Datatype type[9] = { MPI_INT, MPI_INT, MPI_INT, MPI_INT, MPI_INT,MPI_INT,MPI_INT,MPI_CHAR,MPI_DOUBLE};
+  	int blocklen[9] = {1,1,2,4,4,4,4,50,1};
+  	MPI_Aint offsets[9];
 
     offsets[0] = offsetof(sensorAlert, myRank);
     offsets[1] = offsetof(sensorAlert, myTemp);
@@ -147,11 +148,11 @@ int base_io(MPI_Comm world_comm, MPI_Comm comm, int* dims){
     offsets[5] = offsetof(sensorAlert, adjacentCoordsX);
     offsets[6] = offsetof(sensorAlert, adjacentCoordsY);
     offsets[7] = offsetof(sensorAlert, alertTime);
+	offsets[8] = offsetof(sensorAlert, commTime);
 
     // Create MPI struct
-    MPI_Type_create_struct(8, blocklen, offsets, type, &mpiSensorAlertType);
+    MPI_Type_create_struct(9, blocklen, offsets, type, &mpiSensorAlertType);
     MPI_Type_commit(&mpiSensorAlertType);
-
     sensorAlert alert;
 
 	nslaves = size - 1;
@@ -177,9 +178,6 @@ int base_io(MPI_Comm world_comm, MPI_Comm comm, int* dims){
         pthread_join(tid, NULL); // Wait for the thread to complete.
         
  
-		// I think each sensor node needs to communicate to the base station.
-		// Dont think its possible for the sensor node to send a "done" message as each
-		// sensor node would have to communicate with each other.
         
         // Start timer
     	start = clock();
@@ -280,7 +278,7 @@ int base_io(MPI_Comm world_comm, MPI_Comm comm, int* dims){
 					fprintf(fp, "Infrared Satellite Reporting Coord: (%d,%d)\n\n", flaggedReading.coords[0], flaggedReading.coords[1]);
 				}
 				
-				//printf("Communication Time bbetween adjacent nodes: %fs\n", alert.commTimeBetweenAdjNodes);
+				fprintf(fp,"Communication Time between adjacent nodes: %lfs\n", alert.commTime);
 				fprintf(fp, "Communication Time between the reporting node and the base station: %fs\n", commTimeBetweenReporterAndBase);
 				fprintf(fp, "Total Messages sent between reporting node and base station: %d\n", messageTracker[j]);
 				fprintf(fp, "Number of adjacent matches to reporting node: %d\n", adjacentMatches);
@@ -369,9 +367,9 @@ int sensor_io(MPI_Comm world_comm, MPI_Comm comm, int* dims){
 
 	//Alert struct
     MPI_Datatype mpiSensorAlertType;
-    MPI_Datatype type[8] = { MPI_INT, MPI_INT, MPI_INT, MPI_INT, MPI_INT,MPI_INT,MPI_INT,MPI_CHAR};
-  	int blocklen[8] = {1,1,2,4,4,4,4,50};
-  	MPI_Aint offsets[8];
+    MPI_Datatype type[9] = { MPI_INT, MPI_INT, MPI_INT, MPI_INT, MPI_INT,MPI_INT,MPI_INT,MPI_CHAR,MPI_DOUBLE};
+  	int blocklen[9] = {1,1,2,4,4,4,4,50,1};
+  	MPI_Aint offsets[9];
 
     offsets[0] = offsetof(sensorAlert, myRank);
     offsets[1] = offsetof(sensorAlert, myTemp);
@@ -381,9 +379,10 @@ int sensor_io(MPI_Comm world_comm, MPI_Comm comm, int* dims){
     offsets[5] = offsetof(sensorAlert, adjacentCoordsX);
     offsets[6] = offsetof(sensorAlert, adjacentCoordsY);
     offsets[7] = offsetof(sensorAlert, alertTime);
+	offsets[8] = offsetof(sensorAlert, commTime);
 
     // Create MPI struct
-    MPI_Type_create_struct(8, blocklen, offsets, type, &mpiSensorAlertType);
+    MPI_Type_create_struct(9, blocklen, offsets, type, &mpiSensorAlertType);
     MPI_Type_commit(&mpiSensorAlertType);
 
     //Assign rank and size variables
@@ -525,7 +524,7 @@ int sensor_io(MPI_Comm world_comm, MPI_Comm comm, int* dims){
 
 			    // Communication time between adjacent nodes
 			    commTimeBetweenAdjNodes = ((double) (end - start)) / CLOCKS_PER_SEC;
-			   
+			   	alert.commTime = commTimeBetweenAdjNodes;
 			    
 		    	//Send alert
 		    	MPI_Send(&alert, 1, mpiSensorAlertType, worldSize-1, SENSOR_STATUS_ALERT, world_comm);
