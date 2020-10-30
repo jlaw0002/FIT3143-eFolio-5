@@ -1,12 +1,12 @@
 #include <mpi.h>
+#include <omp.h>
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
 #include <time.h>
 #include <stddef.h>
-#include <unistd.h>
-#include <pthread.h> 
+#include <unistd.h> 
 
 #define SHIFT_ROW 0
 #define SHIFT_COL 1
@@ -45,8 +45,8 @@ struct satelliteReading {
 struct satelliteReading satelliteReadings[ITERATIONS];
 int nreadings = 0;
 
-int base_io(MPI_Comm world_comm, MPI_Comm comm, int* dims);
-void* getSatelliteReading(void *pArg);
+int base_io(MPI_Comm world_comm, MPI_Comm comm, int* dims, int iteration);
+void getSatelliteReading(void *pArg);
 int sensor_io(MPI_Comm world_comm, MPI_Comm comm, int* dims);
 
 int main(int argc, char *argv[]) {
@@ -98,19 +98,42 @@ int main(int argc, char *argv[]) {
     }
 
 	MPI_Comm_split( MPI_COMM_WORLD,myRank != size-1, 0, &comm2D); 
-
+	int i;
+	//Parallel part of code to generate random numbers
+    #pragma omp parallel for private(i) shared(myRank, size, dims, satelliteReadings, nreadings) schedule(static, 2) num_threads(2)
+	for(i = 0; i < ITERATIONS; i++){
+	    if (omp_get_thread_num() == 0) {
+		    getSatelliteReading((void*) dims);
+		} else {
+		    if (myRank == size-1) 
+		        base_io( MPI_COMM_WORLD, comm2D, dims, i );
+            else
+		        sensor_io( MPI_COMM_WORLD, comm2D, dims);
+		}
+	}
+    
+    //Exit message tag
+	for (int j=0; j< size-1; j++){
+		printf("Sending exit message to process %d \n",j);
+		MPI_Send(&j, 1, MPI_INT, j, EXIT_TAG, MPI_COMM_WORLD);
+	}
+	
+	printf("Done\n");
+	fflush(stdout);
+    
+    /*
    	if (myRank == size-1) 
 		base_io( MPI_COMM_WORLD, comm2D, dims );
     else
-		sensor_io( MPI_COMM_WORLD, comm2D, dims);
+		sensor_io( MPI_COMM_WORLD, comm2D, dims);*/
+    
     MPI_Finalize();
     
-
     return 0;
-
 }
+
 /* This is the master */
-int base_io(MPI_Comm world_comm, MPI_Comm comm, int* dims){
+int base_io(MPI_Comm world_comm, MPI_Comm comm, int* dims, int iteration){
 	int i, size, nslaves,myRank;
 	char buf[256], buf2[256];
 	MPI_Status status;
@@ -139,15 +162,15 @@ int base_io(MPI_Comm world_comm, MPI_Comm comm, int* dims){
     sensorAlert alert;
 
 	nslaves = size - 1;
-	printf("Base Station Master Node: Global Rank %d \n",myRank);
+	//printf("Base Station Master Node: Global Rank %d \n",myRank);
 
 	int testCount=0;
-	for (int i=0; i<ITERATIONS; i++){
+	//for (int i=0; i<ITERATIONS; i++){
 	    // Infrared Imaging Satellite Simulation using a POSIX thread
-        pthread_t tid;
-        pthread_create(&tid, 0, getSatelliteReading, (void*) dims); // Create the thread
-        pthread_join(tid, NULL); // Wait for the thread to complete.
-
+        //pthread_t tid;
+        //pthread_create(&tid, 0, getSatelliteReading, (void*) dims); // Create the thread
+        //pthread_join(tid, NULL); // Wait for the thread to complete.
+ 
 		// I think each sensor node needs to communicate to the base station.
 		// Dont think its possible for the sensor node to send a "done" message as each
 		// sensor node would have to communicate with each other.
@@ -181,7 +204,8 @@ int base_io(MPI_Comm world_comm, MPI_Comm comm, int* dims){
 				int flag = 0;
 				struct satelliteReading flaggedReading;
 				
-				for(int i = 0; i < ITERATIONS; i++){
+				for(int i = 0; i < nreadings; i++){
+				printf("# Now reading: %d°C at (%d,%d) on %s\n", satelliteReadings[i].temp, satelliteReadings[i].coords[0], satelliteReadings[i].coords[1], satelliteReadings[i].time);
 				    if ((satelliteReadings[i].coords[0] == alert.myCoord[0] && satelliteReadings[i].coords[1] == alert.myCoord[1]) || 
 				    (satelliteReadings[i].coords[0] == alert.adjacentCoordsX[0] && satelliteReadings[i].coords[1] == alert.adjacentCoordsY[0]) ||
 				    (satelliteReadings[i].coords[0] == alert.adjacentCoordsX[1] && satelliteReadings[i].coords[1] == alert.adjacentCoordsY[1]) ||
@@ -200,7 +224,7 @@ int base_io(MPI_Comm world_comm, MPI_Comm comm, int* dims){
 				}
 				
 				printf("--------------------------------------------------\n");
-				printf("Iteration: %d\n", i);
+				printf("Iteration: %d\n", iteration);
 				printf("Logged Time:\t%s\n", currentTimeString);
 				printf("Alert Rrported Time:\t%s\n", alert.alertTime);
 				 
@@ -213,8 +237,8 @@ int base_io(MPI_Comm world_comm, MPI_Comm comm, int* dims){
 				printf("%d\t(%d,%d)\t%d\n", alert.myRank, alert.myCoord[0], alert.myCoord[1], alert.myTemp);
 				
 				printf("Adjacent Nodes\tCoord\tTemp\tMAC\tIP\n");
-				for(int i = 0; i < 4; i++){
-				    printf("%d\t(%d,%d)\t%d\n", alert.adjacentRanks[i], alert.adjacentCoordsX[i], alert.adjacentCoordsY[i], alert.adjacentTemps[i]);
+				for(int k = 0; k < 4; k++){
+				    printf("%d\t(%d,%d)\t%d\n", alert.adjacentRanks[k], alert.adjacentCoordsX[k], alert.adjacentCoordsY[k], alert.adjacentTemps[k]);
 				}
 				
 				printf("Infrared Satellite Reporting Time: %s\n", flaggedReading.time);
@@ -225,7 +249,7 @@ int base_io(MPI_Comm world_comm, MPI_Comm comm, int* dims){
 				printf("Total Messages send between reporting node and base station: %d\n", 1);
 				printf("Number of adjacent matches to reporting node: %d\n", 3);
 				printf("--------------------------------------------------\n");
-				fflush(stdout);
+				//fflush(stdout);
 			}
 			
 			testCount++;
@@ -240,8 +264,8 @@ int base_io(MPI_Comm world_comm, MPI_Comm comm, int* dims){
 		//Sleep delay
 		printf("Waiting for delay before next iteration...\n");
 		sleep(1);
-	}
-
+	//}
+    /*
 	//Exit message tag
 	for (int j=0; j< nslaves; j++){
 		//printf("Sending exit message to process %d \n",j);
@@ -249,12 +273,13 @@ int base_io(MPI_Comm world_comm, MPI_Comm comm, int* dims){
 	}
 	
 	printf("TEST COUNT : %d \n",testCount);
-	fflush(stdout);
+	fflush(stdout);*/
 
 	return 0;
 }
 
-void* getSatelliteReading(void* pArg) { 
+void getSatelliteReading(void* pArg) { 
+    printf("Generating Satellite Reading\n");
     // Seed RNG with current time 
     srand(time(NULL));
     
@@ -282,9 +307,13 @@ void* getSatelliteReading(void* pArg) {
     strcpy(reading.time,currentTimeString);
     
     // Add reading to global variable so that base node can use reading for analysis
+    if(nreadings >= 9)
+        nreadings = 0;
+        
     satelliteReadings[nreadings] = reading;
     nreadings++;
     
+    return;
 }
 
 int sensor_io(MPI_Comm world_comm, MPI_Comm comm, int* dims){
