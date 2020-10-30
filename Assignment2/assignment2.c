@@ -122,6 +122,17 @@ int base_io(MPI_Comm world_comm, MPI_Comm comm, int* dims){
 	clock_t start, end;
     double commTimeBetweenReporterAndBase;
 
+    // Create a file named "results.txt"
+    FILE *fp;
+    fp = fopen("results.txt", "w+");
+
+    //Compute results creation time to add to header of text file
+    time_t creationTime = time(NULL);
+    char * creationTimeString = ctime(&creationTime);
+    creationTimeString[strlen(creationTimeString)-1] = '\0';
+   
+    fprintf(fp, "Results generated on %s with %d sensors in a [%d,%d] grid\n", creationTimeString, (dims[0] * dims[1]), dims[0], dims[1]);
+
 	//Alert struct
     MPI_Datatype mpiSensorAlertType;
     MPI_Datatype type[8] = { MPI_INT, MPI_INT, MPI_INT, MPI_INT, MPI_INT,MPI_INT,MPI_INT,MPI_CHAR};
@@ -238,42 +249,42 @@ int base_io(MPI_Comm world_comm, MPI_Comm comm, int* dims){
 						adjacentMatches++;
 				}
 				
-				printf("--------------------------------------------------\n");
-				printf("Iteration: %d\n", i);
-				printf("Logged Time:\t\t%s\n", currentTimeString);
-				printf("Alert Reported Time:\t%s\n", alert.alertTime);
+				fprintf(fp, "----------------------------------------------------------------------------\n");
+				fprintf(fp, "Iteration: %d\n", i);
+				fprintf(fp, "Logged Time:\t\t\t%s\n", currentTimeString);
+				fprintf(fp, "Alert Reported Time:\t%s\n", alert.alertTime);
 				 
 				if(flag == 1){
-				   printf("Alert Type: True\n\n");
+				   fprintf(fp, "Alert Type: True\n\n");
 				   trueAlerts++;
 				}
 				else{
-				   printf("Alert Type: False\n\n");
+				   fprintf(fp, "Alert Type: False\n\n");
 				   falseAlerts++;
 				}
 				   
-				printf("Reporting Node\tCoord\tTemp\n");
-				printf("%d\t\t(%d,%d)\t%d°C\n\n", alert.myRank, alert.myCoord[0], alert.myCoord[1], alert.myTemp);
+				fprintf(fp, "Reporting Node\tCoord\tTemp\n");
+				fprintf(fp, "%d\t\t\t\t(%d,%d)\t%d°C\n\n", alert.myRank, alert.myCoord[0], alert.myCoord[1], alert.myTemp);
 				
-				printf("Adjacent Nodes\tCoord\tTemp\n");
+				fprintf(fp, "Adjacent Nodes\tCoord\tTemp\n");
 				for(int k = 0; k < 4; k++){
 					if(alert.adjacentTemps[k] > 0)
-				    	printf("%d\t\t(%d,%d)\t%d°C\n", alert.adjacentRanks[k], alert.adjacentCoordsX[k], alert.adjacentCoordsY[k], alert.adjacentTemps[k]);
+				    	fprintf(fp, "%d\t\t\t\t(%d,%d)\t%d°C\n", alert.adjacentRanks[k], alert.adjacentCoordsX[k], alert.adjacentCoordsY[k], alert.adjacentTemps[k]);
 				}
 
-				printf("\n");
+				fprintf(fp, "\n");
 				
 				if(flag == 1){
-					printf("Infrared Satellite Reporting Time: %s\n", flaggedReading.time);
-					printf("Infrared Satellite Reporting Temp: %d°C\n", flaggedReading.temp);
-					printf("Infrared Satellite Reporting Coord: (%d,%d)\n\n", flaggedReading.coords[0], flaggedReading.coords[1]);
+					fprintf(fp, "Infrared Satellite Reporting Time: %s\n", flaggedReading.time);
+					fprintf(fp, "Infrared Satellite Reporting Temp: %d°C\n", flaggedReading.temp);
+					fprintf(fp, "Infrared Satellite Reporting Coord: (%d,%d)\n\n", flaggedReading.coords[0], flaggedReading.coords[1]);
 				}
 				
 				//printf("Communication Time bbetween adjacent nodes: %fs\n", alert.commTimeBetweenAdjNodes);
-				printf("Communication Time between the reporting node and the base station: %fs\n", commTimeBetweenReporterAndBase);
-				printf("Total Messages send between reporting node and base station: %d\n", messageTracker[j]);
-				printf("Number of adjacent matches to reporting node: %d\n", adjacentMatches);
-				printf("--------------------------------------------------\n");
+				fprintf(fp, "Communication Time between the reporting node and the base station: %fs\n", commTimeBetweenReporterAndBase);
+				fprintf(fp, "Total Messages sent between reporting node and base station: %d\n", messageTracker[j]);
+				fprintf(fp, "Number of adjacent matches to reporting node: %d\n", adjacentMatches);
+				fprintf(fp, "----------------------------------------------------------------------------\n");
 				//fflush(stdout);
 			}
 			
@@ -291,12 +302,15 @@ int base_io(MPI_Comm world_comm, MPI_Comm comm, int* dims){
 	}
 	
 	//printf("TEST COUNT : %d \n",testCount);
-	printf("\n--------------------------------------------------\n");
-	printf("Summary\n");
-	printf("True Alerts: %d\n", trueAlerts);
-	printf("False Alerts: %d\n", falseAlerts);
-	printf("Total Alerts: %d\n", totalAlerts);
-	printf("--------------------------------------------------\n");
+	fprintf(fp, "\n----------------------------------------------------------------------------\n");
+	fprintf(fp, "Summary\n");
+	fprintf(fp, "True Alerts: %d\n", trueAlerts);
+	fprintf(fp, "False Alerts: %d\n", falseAlerts);
+	fprintf(fp, "Total Alerts: %d\n", totalAlerts);
+	fprintf(fp, "----------------------------------------------------------------------------\n");
+
+	printf("results.txt created \n");
+
 	fflush(stdout);
 
 	return 0;
