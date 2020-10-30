@@ -117,7 +117,10 @@ int base_io(MPI_Comm world_comm, MPI_Comm comm, int* dims){
 	char buf[256], buf2[256];
 	MPI_Status status;
 	MPI_Comm_size(world_comm, &size );
-	MPI_Comm_rank(world_comm, &myRank); 
+	MPI_Comm_rank(world_comm, &myRank);
+
+	clock_t start, end;
+    double commTimeBetweenReporterAndBase;
 
 	//Alert struct
     MPI_Datatype mpiSensorAlertType;
@@ -166,6 +169,9 @@ int base_io(MPI_Comm world_comm, MPI_Comm comm, int* dims){
 		// I think each sensor node needs to communicate to the base station.
 		// Dont think its possible for the sensor node to send a "done" message as each
 		// sensor node would have to communicate with each other.
+        
+        // Start timer
+    	start = clock();
 
 		for (int j=0; j< nslaves; j++){
 			//Need to keep in seperate for loop to send first
@@ -178,8 +184,14 @@ int base_io(MPI_Comm world_comm, MPI_Comm comm, int* dims){
 
 			//printf("Looking for message from sensor node with rank %d \n",j);
 			MPI_Recv(&alert, 1, mpiSensorAlertType, j, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
+			
+			// End timer and print duration
+    		end = clock();
+    
 			//printf("messaged received from sensor node with rank %d \n",j);
 			if(status.MPI_TAG == SENSOR_STATUS_ALERT){
+
+				commTimeBetweenReporterAndBase = ((double) (end - start)) / CLOCKS_PER_SEC;
 			
 			    //Get current time for logging
 	            time_t currentTime = time(NULL);
@@ -245,8 +257,11 @@ int base_io(MPI_Comm world_comm, MPI_Comm comm, int* dims){
 				
 				printf("Adjacent Nodes\tCoord\tTemp\n");
 				for(int k = 0; k < 4; k++){
-				    printf("%d\t\t(%d,%d)\t%d°C\n", alert.adjacentRanks[k], alert.adjacentCoordsX[k], alert.adjacentCoordsY[k], alert.adjacentTemps[k]);
+					if(alert.adjacentTemps[k] > 0)
+				    	printf("%d\t\t(%d,%d)\t%d°C\n", alert.adjacentRanks[k], alert.adjacentCoordsX[k], alert.adjacentCoordsY[k], alert.adjacentTemps[k]);
 				}
+
+				printf("\n");
 				
 				if(flag == 1){
 					printf("Infrared Satellite Reporting Time: %s\n", flaggedReading.time);
@@ -254,7 +269,8 @@ int base_io(MPI_Comm world_comm, MPI_Comm comm, int* dims){
 					printf("Infrared Satellite Reporting Coord: (%d,%d)\n\n", flaggedReading.coords[0], flaggedReading.coords[1]);
 				}
 				
-				//printf("Communication Time (seconds): %d\n", 0);
+				//printf("Communication Time bbetween adjacent nodes: %fs\n", alert.commTimeBetweenAdjNodes);
+				printf("Communication Time between the reporting node and the base station: %fs\n", commTimeBetweenReporterAndBase);
 				printf("Total Messages send between reporting node and base station: %d\n", messageTracker[j]);
 				printf("Number of adjacent matches to reporting node: %d\n", adjacentMatches);
 				printf("--------------------------------------------------\n");
@@ -334,6 +350,9 @@ int sensor_io(MPI_Comm world_comm, MPI_Comm comm, int* dims){
 	int myTemp,sensorStatus;
 	int nAdjacent=4;
 
+	clock_t start, end;
+    double commTimeBetweenAdjNodes;
+
 	//Alert struct
     MPI_Datatype mpiSensorAlertType;
     MPI_Datatype type[8] = { MPI_INT, MPI_INT, MPI_INT, MPI_INT, MPI_INT,MPI_INT,MPI_INT,MPI_CHAR};
@@ -407,6 +426,9 @@ int sensor_io(MPI_Comm world_comm, MPI_Comm comm, int* dims){
 		srand(time(NULL)+myRank*iterationCount);
 	    myTemp = rand() % (MAX_TEMP + 1 - MIN_TEMP) + MIN_TEMP; //Generate random number from 60-100
 
+	    // Start timer
+    	start = clock();
+
 	    //Send value to all adjacent node
 	    for (int i= 0; i< nAdjacent; i++){
 	    	
@@ -423,6 +445,9 @@ int sensor_io(MPI_Comm world_comm, MPI_Comm comm, int* dims){
 
       	MPI_Waitall(4, send_request, send_status);	
     	MPI_Waitall(4, receive_request, receive_status);
+
+    	// Start timer
+    	end = clock();
 
 	    //Set alert struct
       	sensorAlert alert;
@@ -483,6 +508,9 @@ int sensor_io(MPI_Comm world_comm, MPI_Comm comm, int* dims){
 			    char * currentTimeString = ctime(&currentTime);
 			    currentTimeString[strlen(currentTimeString)-1] = '\0';
 			    strcpy(alert.alertTime,currentTimeString);
+
+			    // Communication time between adjacent nodes
+			    commTimeBetweenAdjNodes = ((double) (end - start)) / CLOCKS_PER_SEC;
 			   
 			    
 		    	//Send alert
